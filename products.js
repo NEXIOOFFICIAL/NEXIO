@@ -15,6 +15,22 @@ fetch("https://script.google.com/macros/s/AKfycbyuJnpSAJmwAMLdMhEN26hsibAShv1z8u
 })
 .catch(err => console.error(err));
 
+ function formatHarga(harga){
+
+        if(!harga) return "-";
+
+        const text = harga.toString();
+
+        const match = text.match(/^(\d+)(.*)$/);
+
+        if(!match) return "Rp" + text;
+
+        const angka = Number(match[1]).toLocaleString("id-ID");
+
+        return "Rp" + angka + match[2];
+
+    }
+
 function renderProducts(products){
 
     const grid = document.getElementById("productGrid");
@@ -30,15 +46,27 @@ function renderProducts(products){
         grid.innerHTML += `
         <div class="product-card">
 
+            ${produk.hargaCoret > 0 ? `
+            <div class="promo-badge">
+                🔥 PROMO
+            </div>
+            ` : ""}
+
             <img src="${gambar}" class="product-image">
 
             <div class="product-name">
                 ${produk.nama}
             </div>
 
-            <div class="product-price">
-                Rp${Number(produk.harga).toLocaleString("id-ID")}
-            </div>
+           ${produk.hargaCoret > 0 ? `
+        <div class="product-old-price">
+            ${formatHarga(produk.hargaCoret)}
+        </div>
+        ` : ""}
+
+        <div class="product-price">
+           ${formatHarga(produk.harga)}
+        </div>
 
             <div class="cart-action">
 
@@ -120,4 +148,3 @@ function filterProduk(kategori,tombol){
     }
 
 }
-
