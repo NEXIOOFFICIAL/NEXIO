@@ -131,6 +131,33 @@ nav a:hover{
     padding:15px;
     border:1px solid #e5e7eb;
     box-shadow:0 6px 20px rgba(0,0,0,0.08);
+    position:relative;
+}
+
+.promo-badge{
+
+    position:absolute;
+
+    top:12px;
+
+    left:12px;
+
+    background:#e53935;
+
+    color:white;
+
+    padding:6px 12px;
+
+    border-radius:20px;
+
+    font-size:12px;
+
+    font-weight:700;
+
+    box-shadow:0 4px 12px rgba(229,57,53,.35);
+
+    z-index:5;
+
 }
 
 .product-card:hover{
@@ -156,6 +183,20 @@ nav a:hover{
 .product-price{
     color:#0d47a1;
     font-weight:bold;
+}
+
+.product-old-price{
+
+    color:#8a8a8a;
+
+    font-size:13px;
+
+    text-decoration:line-through;
+
+    margin-bottom:2px;
+
+    font-weight:500;
+
 }
 
 @media(max-width:768px){
@@ -635,7 +676,7 @@ nav a:hover{
     }
 
 }
-    
+
 </style>
 </head>
 <body>
@@ -671,46 +712,6 @@ nav a:hover{
 
     <div class="filter-container" id="filterKategori">
     </div>
-
-    <div id="loadingProduk" class="skeleton-grid">
-
-    <div class="skeleton-card">
-        <div class="skeleton-image"></div>
-        <div class="skeleton-line"></div>
-        <div class="skeleton-line short"></div>
-    </div>
-
-    <div class="skeleton-card">
-        <div class="skeleton-image"></div>
-        <div class="skeleton-line"></div>
-        <div class="skeleton-line short"></div>
-    </div>
-
-    <div class="skeleton-card">
-        <div class="skeleton-image"></div>
-        <div class="skeleton-line"></div>
-        <div class="skeleton-line short"></div>
-    </div>
-
-    <div class="skeleton-card">
-        <div class="skeleton-image"></div>
-        <div class="skeleton-line"></div>
-        <div class="skeleton-line short"></div>
-    </div>
-
-    <div class="skeleton-card">
-        <div class="skeleton-image"></div>
-        <div class="skeleton-line"></div>
-        <div class="skeleton-line short"></div>
-    </div>
-
-    <div class="skeleton-card">
-        <div class="skeleton-image"></div>
-        <div class="skeleton-line"></div>
-        <div class="skeleton-line short"></div>
-    </div>
-
-</div>
 
     <div id="productGrid" class="product-grid"></div>
     
