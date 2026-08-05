@@ -1,1 +1,23 @@
-<link rel="stylesheet" href="style.css">
+.product-old-price{
+
+    color:#8a8a8a;
+
+    font-size:13px;
+
+    text-decoration:line-through;
+
+    margin-bottom:2px;
+
+    font-weight:500;
+
+}
+
+.product-price{
+
+    color:#e53935;
+
+    font-size:22px;
+
+    font-weight:700;
+
+}
