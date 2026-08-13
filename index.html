@@ -321,14 +321,26 @@ nav a:hover{
 }
 
 .product-image{
+    width:100%;
     height:180px;
     background:#e3eaf5;
     border-radius:10px;
     margin-bottom:15px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    color:#666;
+
+    object-fit:contain;
+
+    display:block;
+}
+
+.recommended-card{
+    min-height:300px;
+    cursor:pointer;
+}
+
+.recommended-card .product-image{
+    width:100%;
+    height:180px;
+    object-fit:contain;
 }
 
 .product-card h3{
@@ -1322,35 +1334,15 @@ nav a:hover{
 </section>
 
 <section class="products" id="products">
+
     <h2>RECOMMENDED PRODUCTS</h2>
 
-    <div class="product-grid">
+    <div class="product-grid" id="recommendedProducts">
 
-        <div class="product-card">
-            <div class="product-image">
-                Gambar Produk 1
-            </div>
-            <h3>Mesin Packaging</h3>
-            <p>Rp 5.000.000</p>
-        </div>
-
-        <div class="product-card">
-            <div class="product-image">
-                Gambar Produk 2
-            </div>
-            <h3>Plastik Kemasan</h3>
-            <p>Rp 150.000</p>
-        </div>
-
-        <div class="product-card">
-            <div class="product-image">
-                Gambar Produk 3
-            </div>
-            <h3>Alat Teknik</h3>
-            <p>Rp 850.000</p>
-        </div>
+        <!-- Produk Recommended akan dimasukkan otomatis -->
 
     </div>
+
 </section>
 
 <section class="about-section">
@@ -1411,8 +1403,28 @@ nav a:hover{
 
 <script>
 
+let recommendedYangDipilih = null;
+
 function closeModal(){
     document.getElementById("signupModal").style.display = "none";
+}
+
+function klikRecommended(id){
+
+    const sudahIsiData =
+        localStorage.getItem("nexioDataFilled");
+
+    if(!sudahIsiData){
+
+        recommendedYangDipilih = id;
+
+        document.getElementById("signupModal").style.display = "flex";
+
+        return;
+    }
+
+    window.location.href =
+        "products.html?id=" + id;
 }
 
 function showSearchNotif(){
@@ -1538,21 +1550,39 @@ async function goProducts(){
 
         await fetch("https://script.google.com/macros/s/AKfycbzdIreJXWc88iVJCnMOaH5hy-erpRIkA5IaNf5iKTDapEjBMyuOVW934r8e88kREJuh/exec", {
 
-    method: "POST",
+            method: "POST",
 
-    mode: "no-cors",
+            mode: "no-cors",
 
-    headers: {
-        "Content-Type": "text/plain;charset=utf-8"
-    },
+            headers: {
+                "Content-Type": "text/plain;charset=utf-8"
+            },
 
-    body: JSON.stringify(data)
+            body: JSON.stringify(data)
 
-});
+        });
 
-        localStorage.setItem("sudahIsiData","true");
 
-        window.location.href="index.html";
+        // Tandai bahwa user sudah mengisi data
+        localStorage.setItem("sudahIsiData", "true");
+        localStorage.setItem("nexioDataFilled", "true");
+
+
+        // Kalau masuk dari Recommended Product
+        if(recommendedYangDipilih){
+
+            window.location.href =
+                "products.html?id=" + recommendedYangDipilih;
+
+            recommendedYangDipilih = null;
+
+            return;
+        }
+
+
+        // Kalau masuk dari tombol Products biasa
+        window.location.href = "index.html";
+
 
     }catch(err){
 
@@ -1562,7 +1592,7 @@ async function goProducts(){
 
     }
 
-}
+};
 
 </script>
 
@@ -1894,6 +1924,131 @@ Silakan tulis pesan terlebih dahulu.
     </div>
 
 </div>
+
+<script>
+
+const recommendedContainer =
+    document.getElementById("recommendedProducts");
+
+if(recommendedContainer){
+
+    recommendedContainer.innerHTML = `
+        <div class="recommended-loading">
+            Memuat produk...
+        </div>
+    `;
+
+    fetch("https://script.google.com/macros/s/AKfycbyuJnpSAJmwAMLdMhEN26hsibAShv1z8uQOsvGw80GRrcf9zr0RPJbC6fe5nhzppnlc1g/exec?recommended=true")
+    .then(res => {
+
+        if(!res.ok){
+            throw new Error("Gagal mengambil data produk");
+        }
+
+        return res.json();
+
+    })
+    .then(products => {
+
+        const recommendedIds = ["125", "210", "311"];
+
+        const recommended = recommendedIds
+            .map(id =>
+                products.find(
+                    produk => String(produk.id) === id
+                )
+            )
+            .filter(Boolean);
+
+        recommendedContainer.innerHTML = "";
+
+        recommended.forEach(produk => {
+
+            const gambar = produk.gambar
+                ? `image produk/${produk.gambar}`
+                : "image produk/no-image.png";
+
+            recommendedContainer.innerHTML += `
+
+                <div class="product-card recommended-card"
+                     onclick="bukaRecommended('${produk.id}')">
+
+                    <img
+                        src="${gambar}"
+                        class="product-image"
+                    >
+
+                    <h3>
+                        ${produk.nama}
+                    </h3>
+
+                    <p>
+                        ${formatHargaRecommended(produk.harga)}
+                    </p>
+
+                </div>
+
+            `;
+
+        });
+
+    })
+    .catch(err => {
+
+        console.error("Recommended Products:", err);
+
+        recommendedContainer.innerHTML = `
+            <div class="recommended-loading">
+                Produk belum dapat dimuat. Silakan refresh halaman.
+            </div>
+        `;
+
+    });
+
+}
+
+// FORMAT HARGA
+function formatHargaRecommended(harga){
+
+    if(harga === null ||
+       harga === undefined ||
+       harga === ""){
+
+        return "-";
+
+    }
+
+    const text =
+        harga.toString().trim();
+
+    const match =
+        text.match(/^(\d+(?:\.\d+)?)(.*)$/);
+
+    if(!match){
+
+        return "Rp" + text;
+
+    }
+
+    const angka =
+        Number(match[1])
+        .toLocaleString("id-ID");
+
+    return "Rp" + angka + match[2];
+
+}
+
+
+// KETIKA RECOMMENDED PRODUCT DIKLIK
+function bukaRecommended(id){
+
+    window.location.href =
+        "products.html?id=" +
+        encodeURIComponent(id);
+
+}
+
+</script>
 
 </body>
 </html>
