@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Keranjang - Nexio</title>
+
+<style>
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #222;
+  padding-top: 80px;
+}
+
+
+
+/* glow biru + merah */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+
+  background:
+    radial-gradient(circle at 20% 25%, rgba(0, 140, 255, 0.22), transparent 45%),
+    radial-gradient(circle at 80% 70%, rgba(255, 0, 60, 0.20), transparent 50%);
+
+  z-index: 0;
+}
+
+
+.cart-container{
+
+    max-width:900px;
+
+    margin:40px auto;
+
+    background:white;
+
+    border-radius:18px;
+
+    padding:30px;
+
+    box-shadow:0 10px 25px rgba(0,0,0,.15);
+
+}
+
+.cart-title{
+
+    font-size:30px;
+
+    font-weight:bold;
+
+    margin-bottom:25px;
+
+}
+
+.cart-item{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    padding:20px 0;
+
+    border-bottom:1px solid #ddd;
+
+}
+
+.item-info{
+
+    flex:1;
+
+}
+
+.item-name{
+
+    font-size:20px;
+
+    font-weight:bold;
+
+}
+
+.item-price{
+
+    color:#666;
+
+    margin-top:5px;
+
+}
+
+.qty{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+
+}
+
+.qty button{
+
+    width:35px;
+
+    height:35px;
+
+    border:none;
+
+    border-radius:8px;
+
+    background:#0d47a1;
+
+    color:white;
+
+    font-size:18px;
+
+    cursor:pointer;
+
+}
+
+.total{
+
+    margin-top:30px;
+
+    text-align:right;
+
+    font-size:24px;
+
+    font-weight:bold;
+
+}
+
+.checkout-btn{
+
+    width:100%;
+
+    margin-top:25px;
+
+    padding:18px;
+
+    border:none;
+
+    border-radius:12px;
+
+    background:#0d47a1;
+
+    color:white;
+
+    font-size:18px;
+
+    cursor:pointer;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="cart-container">
+
+<h1 class="cart-title">🛒 Keranjang Saya</h1>
+
+<div id="cartItems"></div>
+
+<div class="total" id="totalHarga"></div>
+
+<button class="checkout-btn" onclick="checkoutWA()">
+
+Checkout via WhatsApp
+
+</button>
+
+</div>
+
+<script>
+
+let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+
+// =========================
+// FORMAT HARGA UNTUK TAMPILAN
+// =========================
+
+function formatHarga(harga){
+
+    if(harga === null || harga === undefined || harga === ""){
+        return "-";
+    }
+
+    const text = harga.toString().trim();
+
+    const match = text.match(/^(\d+(?:\.\d+)?)(.*)$/);
+
+    if(!match){
+        return "Rp" + text;
+    }
+
+    const angka = Number(match[1]).toLocaleString("id-ID");
+
+    return "Rp" + angka + match[2];
+
+}
+
+
+// =========================
+// AMBIL ANGKA UNTUK HITUNG
+// =========================
+
+function angkaHarga(harga){
+
+    if(harga === null || harga === undefined){
+        return 0;
+    }
+
+    const match = harga.toString().match(/^(\d+(?:\.\d+)?)/);
+
+    if(!match){
+        return 0;
+    }
+
+    return Number(match[1]);
+
+}
+
+
+// =========================
+// TAMPILKAN KERANJANG
+// =========================
+
+function tampilkanKeranjang(){
+
+    const container = document.getElementById("cartItems");
+
+    container.innerHTML = "";
+
+    let total = 0;
+
+    let totalItem = 0;
+
+    cart.forEach((item,index)=>{
+
+        const hargaAngka = angkaHarga(item.harga);
+
+        total += hargaAngka * item.qty;
+
+        totalItem += item.qty;
+
+        container.innerHTML += `
+        <div class="cart-item">
+
+            <div class="item-info">
+
+                <div class="item-name">
+                    ${item.nama}
+                </div>
+
+                <div class="item-price">
+                    ${formatHarga(item.harga)}
+                </div>
+
+            </div>
+
+            <div class="qty">
+
+                <button onclick="kurang(${index})">
+                    -
+                </button>
+
+                <strong>
+                    ${item.qty}
+                </strong>
+
+                <button onclick="tambah(${index})">
+                    +
+                </button>
+
+            </div>
+
+        </div>
+        `;
+
+    });
+
+    document.getElementById("totalHarga").innerHTML = `
+        Total Item : ${totalItem}<br><br>
+        Total Harga : Rp${total.toLocaleString("id-ID")}
+    `;
+
+}
+
+
+// =========================
+// TAMBAH QTY
+// =========================
+
+function tambah(index){
+
+    cart[index].qty++;
+
+    simpan();
+
+}
+
+
+// =========================
+// KURANG QTY
+// =========================
+
+function kurang(index){
+
+    cart[index].qty--;
+
+    if(cart[index].qty<=0){
+
+        cart.splice(index,1);
+
+    }
+
+    simpan();
+
+}
+
+
+// =========================
+// SIMPAN
+// =========================
+
+function simpan(){
+
+    localStorage.setItem(
+        "cart",
+        JSON.stringify(cart)
+    );
+
+    tampilkanKeranjang();
+
+}
+
+
+// =========================
+// CHECKOUT WHATSAPP
+// =========================
+
+function checkoutWA(){
+
+    const cart =
+        JSON.parse(localStorage.getItem("cart")) || [];
+
+    if(cart.length === 0){
+
+        alert("Keranjang masih kosong.");
+
+        return;
+
+    }
+
+    let pesan =
+        "Halo Admin Nexio!%0A%0A";
+
+    pesan +=
+        "Saya ingin memesan produk berikut:%0A%0A";
+
+    let total = 0;
+
+    cart.forEach(item => {
+
+        const hargaAngka =
+            angkaHarga(item.harga);
+
+        const subtotal =
+            hargaAngka * item.qty;
+
+        pesan +=
+            `• ${item.nama}%0A`;
+
+        pesan +=
+            `   Qty : ${item.qty}%0A`;
+
+        pesan +=
+            `   Harga : ${formatHarga(item.harga)}%0A`;
+
+        pesan +=
+            `   Subtotal : Rp${subtotal.toLocaleString("id-ID")}%0A%0A`;
+
+        total += subtotal;
+
+    });
+
+    pesan +=
+        "━━━━━━━━━━━━━━%0A";
+
+    pesan +=
+        `*Total Belanja* : Rp${total.toLocaleString("id-ID")}%0A%0A`;
+
+    pesan +=
+        "(Harga belum termasuk biaya kirim)%0A%0A";
+
+    pesan +=
+        "*Pembayaran via Transfer*%0A";
+
+    pesan +=
+        "Bank BCA : 1234567890%0A";
+
+    pesan +=
+        "A.N. NEXIO%0A%0A";
+
+    pesan +=
+        "Mohon konfirmasi ketersediaan stok.%0A";
+
+    pesan +=
+        "Terima kasih";
+
+    window.open(
+        "https://wa.me/6289507266465?text=" + pesan,
+        "_blank"
+    );
+
+}
+
+
+tampilkanKeranjang();
+
+</script>
+
+</body>
+</html>
