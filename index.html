@@ -1569,12 +1569,15 @@ async function goProducts(){
 
 
         // Kalau masuk dari Recommended Product
-        if(recommendedYangDipilih){
+        const idRecommended =
+            localStorage.getItem("recommendedPilihan");
+
+        if(idRecommended){
+
+            localStorage.removeItem("recommendedPilihan");
 
             window.location.href =
-                "products.html?id=" + recommendedYangDipilih;
-
-            recommendedYangDipilih = null;
+                "products.html?id=" + encodeURIComponent(idRecommended);
 
             return;
         }
@@ -2042,9 +2045,25 @@ function formatHargaRecommended(harga){
 // KETIKA RECOMMENDED PRODUCT DIKLIK
 function bukaRecommended(id){
 
-    window.location.href =
-        "products.html?id=" +
-        encodeURIComponent(id);
+    const sudahIsi =
+        localStorage.getItem("sudahIsiData");
+
+    if(sudahIsi === "true"){
+
+        window.location.href =
+            "products.html?id=" +
+            encodeURIComponent(id);
+
+    }else{
+
+        localStorage.setItem(
+            "recommendedPilihan",
+            id
+        );
+
+        document.getElementById("signupModal").style.display = "flex";
+
+    }
 
 }
 
